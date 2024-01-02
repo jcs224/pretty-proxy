@@ -1,6 +1,7 @@
-import { Hono } from 'https://deno.land/x/hono@v3.11.12/mod.ts'
+import { Context, Hono } from 'https://deno.land/x/hono@v3.11.12/mod.ts'
 import { html } from 'https://deno.land/x/hono@v3.11.12/helper.ts'
 import { HtmlEscapedString } from 'https://deno.land/x/hono@v3.11.12/utils/html.ts';
+import 'https://deno.land/std@0.210.0/dotenv/load.ts'
 
 const app = new Hono()
 
@@ -38,8 +39,6 @@ const PublicLayout = (props: LayoutProps) => MasterLayout({
 })
 
 const wsConnections: WebSocket[] = []
-
-let id = 0
 
 app.get('/proxy', async c => {
   const url = c.req.query('url')
@@ -132,7 +131,7 @@ app.get('/', c => {
           })
 
           Vue.onMounted(() => {
-            const socket = new WebSocket('ws://localhost:8000/updates')
+            const socket = new WebSocket('${ Deno.env.get('PROTOCOL') === 'https' ? 'wss' : 'ws' }://${ Deno.env.get('HOST') }/updates')
 
             socket.onmessage = (e) => {
               const parsed = JSON.parse(e.data)
