@@ -89,8 +89,9 @@ app.get('/', c => {
   return c.html(PublicLayout({ 
     children: html`<div id="app">
       <div style="padding-left: 3rem; padding-right: 3rem; margin-left: auto; margin-right: auto;">
+        <q-btn @click="toggleTheme" color="primary" style="margin-top: 1rem;">Toggle Theme</q-btn>
         <q-table 
-          style="margin-top: 3rem;"
+          style="margin-top: 1rem;"
           title="Visits" 
           :columns="columns" 
           :rows="visitsSorted"
@@ -103,6 +104,8 @@ app.get('/', c => {
     <script type="module">
       Vue.createApp({
         setup() {
+          const $q = Quasar.useQuasar()
+
           const columns = Vue.ref([
             {
               name: 'url',
@@ -130,6 +133,10 @@ app.get('/', c => {
             return visits.value.toReversed()
           })
 
+          const toggleTheme = () => {
+            $q.dark.toggle()
+          }
+
           Vue.onMounted(() => {
             const socket = new WebSocket('${ Deno.env.get('PROTOCOL') === 'https' ? 'wss' : 'ws' }://${ Deno.env.get('HOST') }/updates')
 
@@ -148,6 +155,7 @@ app.get('/', c => {
             columns,
             visits,
             visitsSorted,
+            toggleTheme,
           }
         }
       }).use(Quasar, {
