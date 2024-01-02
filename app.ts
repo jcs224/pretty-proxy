@@ -37,7 +37,7 @@ const PublicLayout = (props: LayoutProps) => MasterLayout({
   foot: props.foot
 })
 
-let updateStream: WebSocket
+const wsConnections: WebSocket[] = []
 
 let id = 0
 
@@ -48,12 +48,16 @@ app.get('/proxy', async c => {
     return c.text('no url provided')
   }
 
-  if (updateStream) {
-    updateStream.send(JSON.stringify({
-      url,
-      ip: c.env.clientIp,
-      accessed: new Date().toISOString()
-    }))
+  if (wsConnections.length > 0) {
+
+    for (let connection of wsConnections) {
+      connection.send(JSON.stringify({
+        url,
+        ip: c.env.clientIp,
+        accessed: new Date().toISOString()
+      }))
+    }
+
   }
 
   let headers = {
@@ -77,7 +81,7 @@ app.get('/proxy', async c => {
 app.get('/updates', async (c) => {
   const { response, socket } = Deno.upgradeWebSocket(c.req.raw)
   
-  updateStream = socket
+  wsConnections.push(socket)
 
   return response
 })
